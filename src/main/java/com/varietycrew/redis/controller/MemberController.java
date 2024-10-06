@@ -3,6 +3,7 @@ package com.varietycrew.redis.controller;
 import com.varietycrew.redis.Service.MemberService;
 import com.varietycrew.redis.dto.SignInDTO;
 import com.varietycrew.redis.security.JwtToken;
+import com.varietycrew.redis.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +37,7 @@ public class MemberController {
     /* "members/test" ->  USER 권한을 가진 사용자에게 허용 */
     @PostMapping("/test")
     public String test() {
-        return "success";
+        return SecurityUtil.getCurrentUsername();
     }
 
     @PostMapping("/health")
