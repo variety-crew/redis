@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://redistest:3307
+    username: ENC(zgZMwT+puERfQ2nHlUZA1w==)
+    password: ENC(cGQqlfzdn+lEdgIrsjm2ew==)
+
+jwt:
+  1d3c5ef1bd06bb0ed5a34f316297a21c57f7ed235d4e3b2e9a0dc4b4ef3ef134
