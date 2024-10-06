@@ -14,5 +14,5 @@ spring:
         '[format_sql]': true  # change to pretty SQL text
 
 jwt:
-  secret: 1d3c5ef1bd06bb0ed5a34f316297a21c57f7ed235d4e3b2e9a0dc4b4ef3ef134
+  secret: 1d3c5ef1bd06bb0ed5a34f316297a21c57f7ed235d4e3b2e9a0dc4b4ef3ef134bd3ks4ld5wk6dl2sk90d1fj1ls2ei2wo1ek3k3lsk87do9wki7elw2qp29485js13ld45kjs4le5fkj5xlk35ls7zxv
 #  expiration: 86400000
