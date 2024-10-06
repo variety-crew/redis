@@ -1,9 +1,18 @@
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://redistest:3307
-    username: ENC(zgZMwT+puERfQ2nHlUZA1w==)
-    password: ENC(cGQqlfzdn+lEdgIrsjm2ew==)
+    url: jdbc:mariadb://localhost:3307/testredisdb
+    username: varc
+#    password:
+
+  jpa:
+    generate-ddl: false
+    show-sql: true
+    database: mysql
+    properties:
+      hibernate:
+        '[format_sql]': true  # change to pretty SQL text
 
 jwt:
-  1d3c5ef1bd06bb0ed5a34f316297a21c57f7ed235d4e3b2e9a0dc4b4ef3ef134
+  secret: 1d3c5ef1bd06bb0ed5a34f316297a21c57f7ed235d4e3b2e9a0dc4b4ef3ef134
+#  expiration: 86400000

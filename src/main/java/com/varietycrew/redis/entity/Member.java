@@ -2,7 +2,7 @@ package com.varietycrew.redis.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Builder
 @EqualsAndHashCode(of = "id")
 public class Member implements UserDetails {
+
     @Id
     @GeneratedValue
     @Column(name = "member_id", updatable = false, unique = true, nullable = false)
@@ -36,7 +37,7 @@ public class Member implements UserDetails {
 
     private String phone;
 
-    private String profileImg;
+//    private String profileImg;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
