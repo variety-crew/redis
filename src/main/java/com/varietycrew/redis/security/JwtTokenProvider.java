@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.Authentication;
@@ -17,17 +18,21 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class JwtTokenProvider {
     private final Key key;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // application.yml에서 secret 값 가져와서 key에 저장
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
+                            RedisTemplate<String, String> redisTemplate) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.redisTemplate = redisTemplate;
     }
 
     // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
@@ -40,7 +45,7 @@ public class JwtTokenProvider {
         long now = (new Date()).getTime();
 
         // Access Token 생성
-        Date accessTokenExpiresIn =  new Date(now + 1000 * 60 * 15); // 15분
+        Date accessTokenExpiresIn = new Date(now + 1000 * 60 * 15); // 15분
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
@@ -53,6 +58,9 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now + 1000L * 60 * 60 * 24 * 7)) // 7일
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
+        // 리프레시 토큰을 Redis에 저장
+        saveRefreshToken(authentication.getName(), refreshToken);
 
         return JwtToken.builder()
                 .grantType("Bearer")
@@ -101,7 +109,6 @@ public class JwtTokenProvider {
         return false;
     }
 
-
     // accessToken
     private Claims parseClaims(String accessToken) {
         try {
@@ -115,4 +122,14 @@ public class JwtTokenProvider {
         }
     }
 
+    /* 리프레시 토큰을 Redis에 저장하는 메서드 */
+    public void saveRefreshToken(String username, String refreshToken) {
+        // 리프레시 토큰을 Redis에 저장 (키: username, 값: refreshToken)
+        redisTemplate.opsForValue().set(username, refreshToken, 7, TimeUnit.DAYS); // 7일 동안 유효
+    }
+
+    /* 리프레시 토큰을 Redis에서 가져오는 메서드 */
+    public String getRefreshToken(String username) {
+        return redisTemplate.opsForValue().get(username);
+    }
 }
