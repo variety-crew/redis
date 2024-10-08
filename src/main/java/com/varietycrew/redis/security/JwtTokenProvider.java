@@ -59,8 +59,10 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // 리프레시 토큰을 Redis에 저장
+        // 리프레시 토큰과 엑세스 토큰을 Hash 형태로 Redis에 저장 (key: username)
+        // 일단 username을 key로 저장 -> 실제 구현은 다른 값(email, id 등)이 좋을 것 같음
         saveRefreshToken(authentication.getName(), refreshToken);
+        saveAccessToken(authentication.getName(), accessToken);
 
         return JwtToken.builder()
                 .grantType("Bearer")
@@ -124,12 +126,30 @@ public class JwtTokenProvider {
 
     /* 리프레시 토큰을 Redis에 저장하는 메서드 */
     public void saveRefreshToken(String username, String refreshToken) {
-        // 리프레시 토큰을 Redis에 저장 (키: username, 값: refreshToken)
-        redisTemplate.opsForValue().set(username, refreshToken, 7, TimeUnit.DAYS); // 7일 동안 유효
+        // 해시로 토큰 저장
+        redisTemplate.opsForHash().put("TOKEN:" + username, "refresh", refreshToken);
+        redisTemplate.expire("TOKEN:" + username, 7, TimeUnit.DAYS); // 만료시간 7일
     }
 
-    /* 리프레시 토큰을 Redis에서 가져오는 메서드 */
+    /* 엑세스 토큰을 Redis에 저장하는 메서드 */
+    public void saveAccessToken(String username, String accessToken) {
+        // 해시로 토큰 저장
+        redisTemplate.opsForHash().put("TOKEN:" + username, "access", accessToken);
+        redisTemplate.expire("TOKEN:" + username, 15, TimeUnit.MINUTES); // 만료시간 15분
+    }
+
+    /* 리프레시 토큰을 Redis에서 조회하는 메서드 */
+
     public String getRefreshToken(String username) {
-        return redisTemplate.opsForValue().get(username);
+        return (String)redisTemplate.opsForHash().get("TOKEN:" + username, "refresh");
+    }
+    /* 엑세스 토큰을 Redis에서 조회하는 메서드 */
+    public String getAccessToken(String username) {
+        return (String)redisTemplate.opsForHash().get("TOKEN:" + username, "access");
+    }
+
+    /* 토큰을 redis에서 삭제하는 메서드 (로그아웃 시 사용) */
+    public void deleteTokens(String username) {
+        redisTemplate.delete("TOKEN:" + username);
     }
 }
